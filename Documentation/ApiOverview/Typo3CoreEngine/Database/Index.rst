@@ -10,27 +10,26 @@ Database: DataHandler basics (formerly known as TCEmain)
 
 When you are using TCE from your backend applications you need to
 prepare two arrays of information which contain the instructions to
-DataHandler (:code:`\TYPO3\CMS\Core\DataHandling\DataHandler`)
+DataHandler (:php:`\TYPO3\CMS\Core\DataHandling\DataHandler`)
 of what actions to perform. They fall into two categories:
 data and commands.
 
-"Data" is when you want to write information to a database table or
+* **Data**: when you want to write information to a database table or
 create a new record.
-
-"Commands" is when you want to move, copy or delete a record in the
+* **Commands**: when you want to move, copy or delete a record in the
 system.
 
 The data and commands are created as multidimensional arrays and to
-understand the API of DataHandler you simply need to understand the
-hierarchy of these two arrays.
+understand the API of the :php:`DataHandler` you need to understand
+the hierarchy of these two arrays.
 
 .. caution::
 
-   The DataHandler needs a properly configured TCA. If your field
-   is not configured in the TCA the DataHandler is not able to
-   interact with it. This also is the case if you configured
-   "type"="none" (which is in fact a valid type) or if an invalid
-   type is specified. In that case the DataHandler is not
+   The :php:`DataHandler` needs a properly configured TCA. If your field
+   is not configured in the TCA the :php:`DataHandler` will not be able
+   to interact with it. This also is the case if you use the
+   :php:`'none'` TCA field type (which is in fact a valid type) or if an
+   invalid type is specified. In that case the :php:`DataHandler` is not
    able to determine the correct value of the field.
 
 .. _tce-commands:
@@ -53,16 +52,16 @@ Description of keywords in syntax:
 
 
  - :Key:
-         tablename
+         :php:`tablename`
    :Type:
          string
    :Description:
-         Name of the database table. Must be configured in $TCA array,
+         Name of the database table. Must be configured in :php:`$GLOBALS['TCA']` array,
          otherwise it cannot be processed.
 
 
  - :Key:
-         uid
+         :php:`uid`
    :Type:
          integer
    :Description:
@@ -70,7 +69,7 @@ Description of keywords in syntax:
 
 
  - :Key:
-         command
+         :php:`command`
    :Type:
          string (command keyword)
    :Description:
@@ -83,7 +82,7 @@ Description of keywords in syntax:
 
 
  - :Key:
-         value
+         :php:`value`
    :Type:
          mixed
    :Description:
@@ -106,7 +105,7 @@ Command keywords and values
 
 
  - :Command:
-         copy
+         :php:`copy`
    :Type:
          integer
    :Value:
@@ -119,8 +118,8 @@ Command keywords and values
 
          - Negative value: The (absolute) value points to another record from the
            same table as the record being copied. The new record will be inserted
-           on the same page as that record and if :code:`$TCA[...]['ctrl']['sortby']` is
-           set, then it will be positioned *after*.
+           on the same page as that record and if :code:`:php:`$GLOBALS['TCA']`[...]['ctrl']['sortby']` is
+           set, then it will be positioned *after* that record.
 
          - Zero value: Record is inserted on tree root level.
 
@@ -136,81 +135,81 @@ Command keywords and values
 
 
  - :Command:
-         move
+         :php:`move`
    :Type:
          integer
    :Value:
-         Works like "copy" but moves the record instead of making a copy.
+         Works like :php:`copy` but moves the record instead of making a copy.
 
 
  - :Command:
-         delete
+         :php:`delete`
    :Type:
          1
    :Value:
          Value should always be "1"
 
          This action will delete the record (or mark the record "deleted" if
-         configured in :code:`$TCA`).
+         configured in :php:`$GLOBALS['TCA']`).
 
 
  - :Command:
-         undelete
+         :php:`undelete`
    :Type:
          1
    :Value:
          Value should always be "1".
 
-         This action will set the deleted-flag back to 0.
+         This action will restore a soft-deleted record which boils down to
+         setting the field configured in :php:`$GLOBALS['TCA'][<table>]['ctrl']['delete']` back to 0.
 
 
  - :Command:
-         localize
+         :php:`localize`
    :Type:
          integer
    :Value:
-         Value is an uid of the :php:`sys_language` to localize the record into.
+         Value is an UID of the :sql:`sys_language` to localize the record into.
          Basically a localization of a record is making a copy of the record
          (possibly excluding certain fields defined with :php:`l10n_mode`) but
-         changing relevant fields to point to the right sys language / original
+         changing relevant fields to point to the right system language and original
          language record.
 
          Requirements for a successful localization is this:
 
-         - :code:`[ctrl]` options "languageField" and "transOrigPointerField" must be
-           defined for the table
+         - The TCA :php:`ctrl` options :php:`languageField` and :php:`transOrigPointerField` are
+           defined for the table.
 
-         - A :code:`sys_language` record with the given :code:`sys_language_uid` must
-           exist.
+         - A :sql:`sys_language` record with the given :sql:`sys_language_uid` exists.
 
-         - The record to be localized by currently be set to "Default" language
-           and not have any value set for the :code:`transOrigPointerField` either.
+         - The record to be localized is currently set to the _Default_ language
+           and does not have any value set for the :php:`transOrigPointerField` either.
 
-         - There cannot exist another localization to the given language for the
-           record (looking in the original record PID).
+         - There does not exist another localization of the desired language for the
+           record on the same page as the in the original record.
 
          Apart from this, ordinary permissions apply as if the user wants to
          make a copy of the record on the same page.
 
-         The :php:`localize` DataHandler command should be used when translating records in "Connected Mode"
-         (strict translation of records from the default language).
-         This command is used when selecting the "Translate" strategy in the content elements translation wizard.
+         The :php:`localize` :php:`DataHandler` command should be used when translating records in
+         "Connected Mode" (strict translation of records from the default language).
+         This command is used when selecting the **Translate** strategy in the content elements translation wizard.
 
 
  - :Command:
-         copyToLanguage
+         :php:`copyToLanguage`
    :Type:
          integer
    :Value:
-         It behaves like :php:`localize` command (both record and child records are copied to given language),
-         but does not set :php:`transOrigPointerField` fields (e.g. :php:`l10n_parent`).
+         This command behaves like the :php:`localize` command (both record and child records are copied to given language),
+         but does not set :php:`transOrigPointerField` fields (e.g. :sql:`l10n_parent`).
 
          The :php:`copyToLanguage` command should be used when localizing records in the "Free Mode".
-         This command is used when localizing content elements using translation wizard's "Copy" strategy.
+         This command is used when selecting the **Copy** strategy in the content elements translation wizard.
 
 
  - :Command:
-         inlineLocalizeSynchronize
+         :php:`inlineLocalizeSynchronize`
    :Type:
          array
    :Value:
@@ -221,12 +220,12 @@ Command keywords and values
                'field' => 'tx_myfieldname', // field we want to synchronize
                'language' => 2, // uid of the target language
                // either the key 'action' or 'ids' must be set
-               'action' => 'localize' // or 'synchronize'
-               'ids' =>  [1, 2, 3] // array of child-ids to be localized
+               'action' => 'localize', // or 'synchronize'
+               'ids' =>  [1, 2, 3], // array of child-ids to be localized
              ]
 
  - :Command:
-         version
+         :php:`version`
    :Type:
          array
    :Value:
@@ -236,50 +235,47 @@ Command keywords and values
 
          - [action] : Keyword determining the versioning action. Options are:
 
-           - "new": Indicates that a new version of the record should be
-             created.Additional keys, specific for "new" action:
+           - :php:`new`: Indicates that a new version of the record should be
+             created. Additional keys, specific for :php:`new` action:
 
-             - [treeLevels]: *(Only pages)* Integer, -1 to 4, indicating the number
+             - :php:`treeLevels`: *(Only pages)* Integer, -1 to 4, indicating the number
                of levels of the page tree to version together with a page. This is
                also referred to as the versioning type:-1 ("element") means only the
                page record gets versioned (default)0 ("page") means the page +
-               content tables (defined by ctrl-flag :code:`versioning_followPages` )>0
+               content tables (defined by TCA :php:`ctrl` flag :php:`versioning_followPages` )>0
                ("branch") means the the whole branch is versioned ( *full copy* of
                all tables), down to the level indicated by the value (1= 1 level
                down, 2= 2 levels down, etc.)The treeLevel is recorded in the field
-               :code:`t3ver_swapmode` and will be observed when the record is swapped
+               :sql:`t3ver_swapmode` and will be observed when the record is swapped
                during publishing.
 
-             - [label]: Indicates the version label to apply. If not given, a
+             - :php:`label`: Indicates the version label to apply. If not given, a
                standard label including version number and date is added.
 
-           - "swap": Indicates that the current online version should be swapped
-             with another.Additional keys, specific for "swap" action:
+           - :php:`swap`: Indicates that the current online version should be swapped
+             with another. Additional keys, specific for :php:`swap` action:
 
-             - [swapWith]: Indicates the uid of the record to swap current version
-               with!
+             - :php:`swapWith`: Indicates the UID of the record to swap current version
+               with
 
-             - [swapIntoWS]: Boolean, indicates that when a version is published it
+             - :php:`swapIntoWS`: Boolean, indicates that when a version is published it
                should be swapped into the workspace of the offline record.
 
-           - "clearWSID": Indicates that the workspace of the record should be set
+           - :php:`clearWSID`: Indicates that the workspace of the record should be set
              to zero (0). This removes versions out of workspaces without
              publishing them.
 
-           - "flush": Completely deletes a version without publishing it.
+           - :php:`flush`: Completely deletes a version without publishing it.
 
-           - "setStage": Sets the stage of an element. *Special feature: The id-
+           - :php:`setStage`: Sets the stage of an element. *Special feature: The id-
              key in the array can be a comma list of ids in order to perform the
-             stageChange over a number of records. Also, the internal variable
-             ->generalComment (also available through :file:`tce_db.php` as
-             "&generalComment") can be used to set a default comment for all stage
-             changes of an instance of tcemain.* Additional keys for this action
-             is:
+             stageChange over a number of records. Additional keys, specific for
+             :php:`setStage` action:
 
-             - [stageId]: Values are: -1 (rejected), 0 (editing, default), 1
+             - :php:`stageId`: Values are: -1 (rejected), 0 (editing, default), 1
                (review), 10 (publish)
 
-             - [comment]: Comment string that goes into the log.
+             - :php:`comment`: Comment string that goes into the log.
 
 
 .. _tce-command-examples:
@@ -302,7 +298,7 @@ Data Array
 
 Syntax::
 
-   $data[tablename][uid][fieldname] = value
+   $data[ tablename ][ uid ][ fieldname ] = value
 
 Description of keywords in syntax:
 
@@ -315,43 +311,44 @@ Description of keywords in syntax:
 
 
  - :Key:
-         tablename
+         :php:`tablename`
    :Type:
          string
    :Description:
-         Name of the database table. Must be configured in $TCA array,
+         Name of the database table. Must be configured in :php:`$GLOBALS['TCA']` array,
          otherwise it cannot be processed.
 
 
  - :Key:
-         uid
+         :php:`uid`
    :Type:
          mixed
    :Description:
          The UID of the record that is modified. If the record already exists,
-         this is an integer. If you're creating new records, use a random
-         string prefixed with "NEW", e.g. "NEW7342abc5e6d".
+         this must be an integer. If you're creating new records, use a placeholder
+         string prefixed with "NEW", e.g. "NEW7342abc5e6d". You can create such placeholder
+         strings easily with :php:`StringUtility::getUniqueId('NEW')`.
 
 
  - :Key:
-         fieldname
+         :php:`fieldname`
    :Type:
          string
    :Description:
          Name of the database field you want to set a value for. Must be
-         configure in $TCA[  *tablename* ]['columns']
+         configure in :php:`$GLOBALS['TCA'][<tablename>]['columns']`
 
 
  - :Key:
-         value
+         :php:`value`
    :Type:
          string
    :Description:
-         Value for "fieldname".
+         Value for :php:`fieldname`.
 
          .. important::
-            Always make sure :php:`$this->stripslashes_values` is false before using
-            DataHandler.)
+            Always make sure :php:`$this->stripslashes_values` is :php:`false` before using
+            the :php:`DataHandler`.)
 
 
 .. note::
@@ -367,43 +364,43 @@ Examples of Data submission
 ---------------------------
 
 This creates a new page titled "The page title" as the first page
-inside page id 45::
+inside page with UID 45::
 
    $data['pages']['NEW9823be87'] = array(
       'title' => 'The page title',
       'subtitle' => 'Other title stuff',
-      'pid' => '45'
+      'pid' => '45',
    );
 
-This creates a new page titled "The page title" right after page id 45
-in the tree::
+This creates a new page titled "The page title" right after page with
+UID 45 in the tree::
 
    $data['pages']['NEW9823be87'] = array(
       'title' => 'The page title',
       'subtitle' => 'Other title stuff',
-      'pid' => '-45'
+      'pid' => '-45',
    );
 
 This creates two new pages right after each other, located right after
-the page id 45::
+the page with UID 45::
 
    $data['pages']['NEW9823be87'] = array(
       'title' => 'Page 1',
-      'pid' => '-45'
+      'pid' => '-45',
    );
    $data['pages']['NEWbe68s587'] = array(
       'title' => 'Page 2',
-      'pid' => '-NEW9823be87'
+      'pid' => '-NEW9823be87',
    );
 
-Notice how the second "pid" value points to the "NEW..." id
-placeholder of the first record. This works because the new id of the
-first record can be accessed by the second record. However it works
+Notice how the second :php:`pid` value points to the "NEW..." UID
+placeholder of the first record. This works because the new UID of the
+first record can be accessed by any other record. However it works
 only when the order in the array is as above since the processing
-happens in that order!
+happens in that order.
 
-This creates a new content record with references to existing and
-one new system category::
+This creates a new content record with references to existing system 
+categories and one new category::
 
    $data['sys_category']['NEW9823be87'] = array(
        'title' => 'New category',
@@ -419,7 +416,7 @@ one new system category::
        ),
    );
 
-This updates the page with uid=9834 to a new title, "New title for
+This updates the page with UID 9834 to a new title, "New title for
 this page", and no\_cache checked::
 
    $data['pages'][9834] = array(
@@ -437,7 +434,7 @@ TCE also has an API for clearing the cache tables of TYPO3:
 
 Syntax::
 
-   $tce->clear_cacheCmd($cacheCmd);
+   $dataHandler->clear_cacheCmd($cacheCmd);
 
 .. t3-field-list-table::
  :header-rows: 1
@@ -453,30 +450,29 @@ Syntax::
 
 
  - :Value:
-         "all"
+         :php:`all`
    :Description:
-         Clears all cache tables (:code:`cache_pages`, :code:`cache_pagesection`,
-         :code:`cache_hash`).
+         Clears all cache tables.
 
-         Only available for admin-users unless explicitly allowed by User
-         TSconfig "options.clearCache.all".
+         Only available for admin users unless explicitly allowed by User
+         TSconfig :ts:`options.clearCache.all`.
 
 
  - :Value:
-         "pages"
+         :php:`pages`
    :Description:
-         Clears all pages from :code:`cache_pages`.
+         Clears all pages from :sql:`cache_pages`.
 
-         Only available for admin-users unless explicitly allowed by User
-         TSconfig "options.clearCache.pages".
+         Only available for admin users unless explicitly allowed by User
+         TSconfig :ts:`options.clearCache.pages`.
 
  - :Value:
-         "temp_cached" or "system"
+         :php:`temp_cached` or :php:`system`
    :Description:
-         Clears all cache entries cache group  :code:`system`.
+         Clears all entries of caches in the :code:`system` cache group.
 
-         Only available for admin-users unless explicitly allowed by User
-         TSconfig "options.clearCache.system".
+         Only available for admin users unless explicitly allowed by User
+         TSconfig :ts:`options.clearCache.system`.
 
 
 .. _tce-cache-hook:
@@ -486,7 +482,9 @@ Hook for cache post-processing
 
 You can configure cache post-processing with a user defined PHP
 function. Configuration of the hook can be done from
-:file:`ext_localconf.php`. An example might look like::
+:file:`ext_localconf.php`.
+
+An example might look like::
 
    $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['clearCachePostProc'][] = 'myext_cacheProc->proc';
    require_once(\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('myext') . 'class.myext_cacheProc.php');
@@ -494,7 +492,7 @@ function. Configuration of the hook can be done from
 
 .. _tce-flags:
 
-Flags in DataHandler
+Flags in the DataHandler
 ====================
 
 There are a few internal variables you can set prior to executing
@@ -509,7 +507,7 @@ commands or data submission. These are the most significant:
 
 
  - :Variable:
-         ->deleteTree
+         :php:`->deleteTree`
    :Type:
          Boolean
    :Description:
@@ -519,40 +517,40 @@ commands or data submission. These are the most significant:
          under it (user must have delete permissions to it all). If not set,
          then the page is deleted *only* if it has no branch.
 
-         Default is false.
+         Default is :php:`false`.
 
 
  - :Variable:
-         ->copyTree
+         :php:`->copyTree`
    :Type:
          Integer
    :Description:
          Sets the number of branches on a page tree to copy.
 
-         If :code:`0` then branch is *not* copied. If :code:`1` then pages on the 1st level is
-         copied. If :code:`2` then pages on the second level is copied, and so on.
+         If :php:`0` then branch is *not* copied. If :php:`1` then pages on the 1st level is
+         copied. If :php:`2` then pages on the second level is copied, and so on.
 
-         Default is zero.
+         Default is :php:`0`.
 
 
  - :Variable:
-         ->reverseOrder
+         :php:`->reverseOrder`
    :Type:
          Boolean
    :Description:
          If set, the data array is reversed in the order, which is a nice thing
          if you're creating a whole bunch of new records.
 
-         Default is zero.
+         Default is :php:`false`.
 
 
  - :Variable:
-         ->copyWhichTables
+         :php:`->copyWhichTables`
    :Type:
          list of strings (tables)
    :Description:
          This list of tables decides which tables will be copied. If empty then
-         none will. If "\*" then all will (that the user has permission to of
-         course).
+         no table will be copied. If "\*" then all tables will be copied. User permissions are always
+         applied here.
 
          Default is "\*".
